@@ -27,4 +27,5 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 # 7. สั่งรัน Migration และเปิดเว็บ
-CMD bash -c "php artisan migrate --force && php artisan config:clear && apache2-foreground"
+# เพิ่มคำสั่ง 'php artisan storage:link' เพื่อสร้างทางเชื่อมรูปภาพ
+CMD bash -c "php artisan storage:link && php artisan migrate --force && php artisan config:clear && apache2-foreground"
