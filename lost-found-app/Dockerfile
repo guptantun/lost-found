@@ -26,4 +26,5 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 # สั่งล้าง Config และ Cache เก่าทิ้ง ก่อนจะเริ่มรันเว็บ
-CMD bash -c "php artisan config:clear && php artisan cache:clear && apache2-foreground"
+# เพิ่มคำสั่ง 'php artisan migrate --force' เพื่อสร้างตารางให้เองอัตโนมัติ
+CMD bash -c "php artisan migrate --force && php artisan config:clear && apache2-foreground"
