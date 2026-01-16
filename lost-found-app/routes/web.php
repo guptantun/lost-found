@@ -61,54 +61,38 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
     // 4.1 หน้า Dashboard ภาพรวม
-    // URL: /admin
-    // Route Name: admin.dashboard
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     
     // 4.2 จัดการ Users
-    // URL: /admin/users
-    // Route Name: admin.users
     Route::get('/users', [AdminController::class, 'users'])->name('users');
-    
-    // URL: /admin/users/{id} (Method: DELETE)
-    // Route Name: admin.delete_user
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('delete_user');
     
     // 4.3 จัดการ Items (ประกาศ)
-    // URL: /admin/items
-    // Route Name: admin.items
     Route::get('/items', [AdminController::class, 'items'])->name('items');
-    
-    // URL: /admin/items/{id} (Method: DELETE)
-    // Route Name: admin.delete_item
     Route::delete('/items/{id}', [AdminController::class, 'deleteItem'])->name('delete_item');
 
     // 4.4 Actions พื้นฐาน (จัดการ Report)
-    // URL: /admin/reports/{id}/dismiss
-    // Route Name: admin.dismiss_report
     Route::post('/reports/{id}/dismiss', [AdminController::class, 'dismissReport'])->name('dismiss_report');
 });
 
 // ----------------------------------------------------------------
-// 🔥 5. Route ลับสำหรับตั้งค่า Admin (ใช้เสร็จแล้วแนะนำให้ลบออก)
+// 🔥 5. Route ลับสำหรับตั้งค่า Admin (แบบระบุอีเมลได้เอง ไม่ต้องแก้โค้ด)
 // ----------------------------------------------------------------
-Route::get('/setup-admin', function () {
-    // 🔴 1. แก้เป็นอีเมลของคุณที่สมัครสมาชิกไว้แล้ว ตรงนี้! 👇
-    $email = 'caption.naktai@gmail.com'; 
-
+Route::get('/setup-admin/{email}', function ($email) {
+    
+    // ค้นหา User ตามอีเมลที่พิมพ์มาใน URL
     $user = \App\Models\User::where('email', $email)->first();
 
     if (!$user) {
-        return 'ไม่พบ User อีเมล: ' . $email . ' (กรุณาสมัครสมาชิกที่หน้าเว็บก่อนครับ)';
+        return '❌ ไม่พบผู้ใช้: ' . $email . ' (กรุณาสมัครสมาชิกก่อนนะครับ)';
     }
 
-    // 🔴 2. ตั้งค่า Admin 
-    // (ส่วนใหญ่จะเป็น is_admin แต่ถ้า database คุณใช้ชื่ออื่น เช่น role หรือ type ให้แก้ตรงนี้)
+    // ตั้งค่า Admin (ถ้า Database คุณใช้ชื่ออื่นนอกจาก is_admin ให้แก้ตรงนี้)
     $user->is_admin = 1; 
-    // $user->role = 'admin'; // <--- ถ้าใช้ role ให้เปิดบรรทัดนี้แทน
-    // $user->type = 'admin'; // <--- ถ้าใช้ type ให้เปิดบรรทัดนี้แทน
+    // $user->role = 'admin'; 
+    // $user->type = 'admin'; 
 
     $user->save();
 
-    return '✅ เรียบร้อย! ตั้งค่าให้ ' . $email . ' เป็น Admin แล้ว กรุณา Logout แล้ว Login ใหม่ครับ';
+    return '✅ สำเร็จ! ตั้งค่าให้ ' . $email . ' เป็น Admin เรียบร้อยแล้ว (Logout/Login ใหม่ด้วยนะครับ)';
 });
