@@ -6,11 +6,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    // ลบ HasApiTokens ออก เหลือแค่นี้พอ
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin', // เพิ่มเผื่อไว้สำหรับระบบ Admin
+        'is_admin',
     ];
 
     /**
@@ -45,12 +45,9 @@ class User extends Authenticatable
         'is_admin' => 'boolean',
     ];
 
-    // =========================================================
-    // 🔥 ส่วนที่ขาดหายไป: ฟังก์ชันเชื่อมโยงกับ Item (สำคัญมาก)
-    // =========================================================
+    // ฟังก์ชันเชื่อมโยงกับ Item (สำคัญ ห้ามลบ)
     public function items()
     {
-        // สั่งว่า User 1 คน มีได้หลาย Item (One to Many)
         return $this->hasMany(Item::class); 
     }
 }
