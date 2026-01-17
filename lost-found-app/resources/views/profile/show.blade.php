@@ -11,6 +11,12 @@
 </head>
 <body class="bg-slate-50 text-gray-800">
 
+    {{-- คำนวณเบอร์โทรล่าสุดที่นี่ --}}
+    @php
+        $latestItem = $user->items->sortByDesc('created_at')->first();
+        $phone = $latestItem ? $latestItem->phone_number : 'ยังไม่มีข้อมูลติดต่อ';
+    @endphp
+
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <a href="{{ route('home') }}" class="flex items-center gap-2 text-indigo-600 font-bold hover:bg-indigo-50 px-3 py-2 rounded-lg transition">
@@ -61,7 +67,7 @@
                         </div>
                     </div>
 
-                    @if(Auth::id() == $user->id)
+                    @if(Auth::check() && Auth::id() == $user->id)
                         <div class="mt-8 space-y-2">
                             @if($user->is_admin)
                             <a href="{{ route('admin.dashboard') }}" class="block w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black transition shadow-lg hover:-translate-y-1">

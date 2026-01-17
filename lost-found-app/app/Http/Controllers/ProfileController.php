@@ -10,39 +10,46 @@ use App\Models\Item;
 
 class ProfileController extends Controller
 {
-    // แสดงหน้าเปลี่ยนรหัสผ่าน
+    // ------------------------------------------
+    // ส่วนที่ 1: แสดงหน้าโปรไฟล์ (Public Profile)
+    // ------------------------------------------
+    public function show($id)
+    {
+        // 1. หา User ตาม ID (ถ้าไม่เจอให้ Error 404)
+        $user = User::findOrFail($id);
+        
+        // 2. ดึงประกาศทั้งหมดที่ User คนนี้เคยโพสต์
+        $items = Item::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+
+        // 3. ส่งข้อมูลไปที่หน้า View
+        return view('profile.show', compact('user', 'items'));
+    }
+
+    // ------------------------------------------
+    // ส่วนที่ 2: เปลี่ยนรหัสผ่าน (Change Password)
+    // ------------------------------------------
     public function showChangePasswordForm()
     {
         return view('auth.change-password');
     }
 
-    // บันทึกการเปลี่ยนรหัสผ่าน (แก้ตรงนี้ให้เหลือ min:4)
     public function updatePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|string|min:4|confirmed', // <-- แก้เป็น 4 ตัวตรงนี้
+            'new_password' => 'required|string|min:4|confirmed', // <-- ขั้นต่ำ 4 ตัว
         ]);
 
+        // เช็คว่ารหัสเก่าถูกไหม
         if (!Hash::check($request->current_password, Auth::user()->password)) {
             return back()->withErrors(['current_password' => 'รหัสผ่านปัจจุบันไม่ถูกต้อง']);
         }
 
+        // อัปเดตรหัสใหม่
         User::where('id', Auth::user()->id)->update([
             'password' => Hash::make($request->new_password)
         ]);
 
         return back()->with('success', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!');
-    }
-
-    // แสดงหน้าโปรไฟล์ (เพิ่มฟังก์ชันนี้เพื่อให้กดดูโปรไฟล์ได้)
-    public function show($id)
-    {
-        $user = User::findOrFail($id);
-        
-        // ดึงรายการที่คนนี้เคยโพสต์
-        $items = Item::where('user_id', $id)->orderBy('created_at', 'desc')->get();
-
-        return view('profile.show', compact('user', 'items'));
     }
 }
