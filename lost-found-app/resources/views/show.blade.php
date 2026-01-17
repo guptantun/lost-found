@@ -139,9 +139,17 @@
                                     <i class="fa-solid fa-user text-indigo-600 text-2xl"></i>
                                 </div>
                                 <p class="text-gray-500 text-sm mb-1">ผู้ติดต่อ</p>
-                                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ $item->reporter_name }}</h3>
                                 
-                                {{-- [จุดที่แก้] ส่วนปุ่มแชท --}}
+                                {{-- ======================================================= --}}
+                                {{-- 🔥 แก้ไขตรงนี้: ใส่ลิงก์ไปหน้า Profile --}}
+                                {{-- ======================================================= --}}
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">
+                                    <a href="{{ route('profile.show', $item->user_id) }}" class="hover:text-indigo-600 hover:underline transition flex items-center justify-center gap-2">
+                                        {{ $item->reporter_name }} <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400"></i>
+                                    </a>
+                                </h3>
+                                {{-- ======================================================= --}}
+                                
                                 @auth
                                     @if(Auth::id() !== $item->user_id)
                                         <a href="{{ route('chat.start', $item->id) }}" class="block w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition transform hover:-translate-y-1 shadow-lg shadow-indigo-200 mb-3">
@@ -162,17 +170,17 @@
                                     <i class="fa-solid fa-phone mr-2"></i> โทรหา
                                 </a>
                                 @auth
-    @if(Auth::id() !== $item->user_id)
-        <button onclick="openReportModal()" class="block w-full text-gray-400 hover:text-red-500 text-sm font-medium transition mt-4">
-            <i class="fa-solid fa-flag mr-1"></i> แจ้งประกาศไม่เหมาะสม
-        </button>
-        
-        <form id="reportForm" action="{{ route('reports.store', $item->id) }}" method="POST" class="hidden">
-            @csrf
-            <input type="hidden" name="reason" id="reportReason">
-        </form>
-    @endif
-@endauth
+                                    @if(Auth::id() !== $item->user_id)
+                                        <button onclick="openReportModal()" class="block w-full text-gray-400 hover:text-red-500 text-sm font-medium transition mt-4">
+                                            <i class="fa-solid fa-flag mr-1"></i> แจ้งประกาศไม่เหมาะสม
+                                        </button>
+                                        
+                                        <form id="reportForm" action="{{ route('reports.store', $item->id) }}" method="POST" class="hidden">
+                                            @csrf
+                                            <input type="hidden" name="reason" id="reportReason">
+                                        </form>
+                                    @endif
+                                @endauth
                                 <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-shield-halved mr-1"></i> โปรดระมัดระวังการโอนเงินก่อนได้รับของ</p>
                             </div>
                         @endif
@@ -225,28 +233,29 @@
                 .bindPopup("<b>จุดเกิดเหตุ</b><br>{{ $item->location_text }}")
                 .openPopup();
         @endif
+        
         function openReportModal() {
-    Swal.fire({
-        title: 'แจ้งปัญหาประกาศ',
-        input: 'select',
-        inputOptions: {
-            'spam': 'สแปม / โฆษณา',
-            'scam': 'หลอกลวง / มิจฉาชีพ',
-            'fake': 'ข้อมูลเท็จ / ไม่ใช่ของหายจริง',
-            'inappropriate': 'เนื้อหาไม่เหมาะสม'
-        },
-        inputPlaceholder: 'กรุณาเลือกเหตุผล',
-        showCancelButton: true,
-        confirmButtonText: 'ส่งรายงาน',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#ef4444'
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            document.getElementById('reportReason').value = result.value;
-            document.getElementById('reportForm').submit();
+            Swal.fire({
+                title: 'แจ้งปัญหาประกาศ',
+                input: 'select',
+                inputOptions: {
+                    'spam': 'สแปม / โฆษณา',
+                    'scam': 'หลอกลวง / มิจฉาชีพ',
+                    'fake': 'ข้อมูลเท็จ / ไม่ใช่ของหายจริง',
+                    'inappropriate': 'เนื้อหาไม่เหมาะสม'
+                },
+                inputPlaceholder: 'กรุณาเลือกเหตุผล',
+                showCancelButton: true,
+                confirmButtonText: 'ส่งรายงาน',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    document.getElementById('reportReason').value = result.value;
+                    document.getElementById('reportForm').submit();
+                }
+            });
         }
-    });
-}
     </script>
 </body>
 </html>

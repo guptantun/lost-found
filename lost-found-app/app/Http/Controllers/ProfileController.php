@@ -10,42 +10,32 @@ use App\Models\Item;
 
 class ProfileController extends Controller
 {
-    // ------------------------------------------
-    // ส่วนที่ 1: แสดงหน้าโปรไฟล์ (Public Profile)
-    // ------------------------------------------
+    // แสดงหน้าโปรไฟล์ (Public)
     public function show($id)
     {
-        // 1. หา User ตาม ID (ถ้าไม่เจอให้ Error 404)
         $user = User::findOrFail($id);
-        
-        // 2. ดึงประกาศทั้งหมดที่ User คนนี้เคยโพสต์
-        $items = Item::where('user_id', $id)->orderBy('created_at', 'desc')->get();
-
-        // 3. ส่งข้อมูลไปที่หน้า View
-        return view('profile.show', compact('user', 'items'));
+        // ส่ง $user ไปที่ View (Items จะถูกเรียกผ่าน $user->items ใน View เอง)
+        return view('profile.show', compact('user'));
     }
 
-    // ------------------------------------------
-    // ส่วนที่ 2: เปลี่ยนรหัสผ่าน (Change Password)
-    // ------------------------------------------
+    // แสดงฟอร์มเปลี่ยนรหัส
     public function showChangePasswordForm()
     {
         return view('auth.change-password');
     }
 
+    // อัปเดตรหัสผ่าน (แก้เป็นขั้นต่ำ 4 ตัวตรงนี้)
     public function updatePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|string|min:4|confirmed', // <-- ขั้นต่ำ 4 ตัว
+            'new_password' => 'required|string|min:4|confirmed', // <--- แก้ตรงนี้
         ]);
 
-        // เช็คว่ารหัสเก่าถูกไหม
         if (!Hash::check($request->current_password, Auth::user()->password)) {
             return back()->withErrors(['current_password' => 'รหัสผ่านปัจจุบันไม่ถูกต้อง']);
         }
 
-        // อัปเดตรหัสใหม่
         User::where('id', Auth::user()->id)->update([
             'password' => Hash::make($request->new_password)
         ]);

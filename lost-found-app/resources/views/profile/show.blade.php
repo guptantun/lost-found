@@ -11,10 +11,10 @@
 </head>
 <body class="bg-slate-50 text-gray-800">
 
-    {{-- คำนวณเบอร์โทรล่าสุดที่นี่ --}}
+    {{-- Logic ดึงเบอร์โทรจากโพสต์ล่าสุด --}}
     @php
         $latestItem = $user->items->sortByDesc('created_at')->first();
-        $phone = $latestItem ? $latestItem->phone_number : 'ยังไม่มีข้อมูลติดต่อ';
+        $phone = $latestItem ? $latestItem->phone_number : '- ไม่ระบุ -';
     @endphp
 
     <nav class="bg-white shadow-sm sticky top-0 z-50">
@@ -43,7 +43,7 @@
                     </div>
 
                     <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ $user->name }}</h1>
-                    <p class="text-gray-400 text-sm mb-6">สมาชิกตั้งแต่ {{ $user->created_at->format('Y') }}</p>
+                    <p class="text-gray-400 text-sm mb-6">สมาชิกเมื่อ {{ $user->created_at->format('d/m/Y') }}</p>
 
                     <div class="space-y-4 text-left">
                         <div class="bg-gray-50 p-4 rounded-xl flex items-center gap-4">
@@ -98,7 +98,7 @@
                                     @if($item->image_path)
                                         <img src="{{ asset('storage/' . $item->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                                     @else
-                                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
                                             <i class="fa-regular fa-image text-2xl"></i>
                                         </div>
                                     @endif
@@ -141,6 +141,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
