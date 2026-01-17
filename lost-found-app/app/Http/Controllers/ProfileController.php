@@ -4,21 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Item;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
     public function show($id)
     {
-        // 1. ดึงข้อมูล User คนนั้นมา พร้อมกับรายการของที่เขาเคยโพสต์ (เรียงจากใหม่ไปเก่า)
-        $user = User::with(['items' => function($query) {
-            $query->orderBy('created_at', 'desc');
+        $user = User::with(['items' => function($q) {
+            $q->latest(); // เรียงจากใหม่ไปเก่า
         }])->findOrFail($id);
 
-        // 2. แอบดึงเบอร์โทรล่าสุดที่เขาเคยกรอกไว้ในโพสต์ (ถ้ามี) มาโชว์
-        $latestContact = $user->items()->latest()->first();
-        $userPhone = $latestContact ? $latestContact->phone_number : '-';
+        // ดึงเบอร์จากโพสต์ล่าสุดเพื่อแสดงในโปรไฟล์ (ถ้ามี)
+        $latestItem = $user->items->first();
+        $phone = $latestItem ? $latestItem->phone_number : 'ไม่ได้ระบุ';
 
-        return view('profile.show', compact('user', 'userPhone'));
+        return view('profile.show', compact('user', 'phone'));
     }
 }

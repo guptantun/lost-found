@@ -1,33 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-// นำเข้า Controller ทั้งหมด
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController; // 👈 เพิ่มอันนี้
+use App\Http\Controllers\ProfileController; // อย่าลืมบรรทัดนี้
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Web Routes (ฉบับสมบูรณ์)
 |--------------------------------------------------------------------------
 */
 
-// ----------------------------------------------------------------
-// 1. หน้าสาธารณะ (Public)
-// ----------------------------------------------------------------
+// หน้าแรก (Home)
 Route::get('/', [ItemController::class, 'index'])->name('home');
+
+// ดูรายละเอียดโพสต์
 Route::get('/items/{item}', [ItemController::class, 'show'])->name('items.show');
 
-// 🔥 เส้นทางดูโปรไฟล์ผู้ใช้
+// ดูโปรไฟล์ผู้ใช้ (New Feature ✨)
 Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
-// ----------------------------------------------------------------
-// 2. สำหรับคนยังไม่ล็อกอิน (Guest Only)
-// ----------------------------------------------------------------
+// โซนคนยังไม่ล็อกอิน
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -35,33 +31,31 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 });
 
-// ----------------------------------------------------------------
-// 3. สำหรับสมาชิก (Member Zone)
-// ----------------------------------------------------------------
+// โซนสมาชิก (ต้องล็อกอิน)
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
-    // เปลี่ยนรหัสผ่าน
+    // เปลี่ยนรหัสผ่าน (แก้ให้เข้าได้แล้ว ✅)
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
     Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.update');
     
-    // จัดการประกาศ
+    // จัดการโพสต์
     Route::post('/items', [ItemController::class, 'store'])->name('items.store');
     Route::get('/items/{item}/edit', [ItemController::class, 'edit'])->name('items.edit');
     Route::put('/items/{item}', [ItemController::class, 'update'])->name('items.update');
     Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
 
-    // Chat & Report
+    // Chat
     Route::get('/chat/start/{item}', [ChatController::class, 'start'])->name('chat.start');
     Route::get('/chats', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chats/{id}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chats/{id}/send', [ChatController::class, 'send'])->name('chat.send');
+    
+    // Report
     Route::post('/items/{item}/report', [ReportController::class, 'store'])->name('reports.store');
 });
 
-// ----------------------------------------------------------------
-// 4. ผู้ดูแลระบบ (Admin Zone)
-// ----------------------------------------------------------------
+// โซน Admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
@@ -71,21 +65,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/reports/{id}/dismiss', [AdminController::class, 'dismissReport'])->name('dismiss_report');
 });
 
-// ----------------------------------------------------------------
-// 5. Route ลับ (ตั้งค่า Admin / แก้รูป)
-// ----------------------------------------------------------------
-Route::get('/setup-admin/{email}', function ($email) {
-    $user = \App\Models\User::where('email', $email)->first();
-    if (!$user) return '❌ ไม่พบผู้ใช้';
-    $user->is_admin = 1; 
-    $user->save();
-    return '✅ ตั้งค่า Admin ให้ ' . $email . ' สำเร็จ (Logout/Login ใหม่ด้วย)';
-});
-
+// Route ลับสำหรับตั้งค่า
 Route::get('/fix-images', function () {
     $target = storage_path('app/public');
     $link = public_path('storage');
-    if (file_exists($link)) return '✅ มี Symlink แล้ว';
-    symlink($target, $link);
-    return '✅ สร้าง Symlink สำเร็จ';
+    if (!file_exists($link)) { symlink($target, $link); return '✅ Link created'; }
+    return '✅ Link exists';
 });
