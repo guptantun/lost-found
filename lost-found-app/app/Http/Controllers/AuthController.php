@@ -81,4 +81,33 @@ public function login(Request $request)
         $request->session()->regenerateToken();
         return redirect('/');
     }
+    // 1. แสดงหน้าฟอร์มเปลี่ยนรหัส
+    public function showChangePasswordForm()
+    {
+        return view('auth.change-password');
+    }
+
+    // 2. บันทึกรหัสผ่านใหม่
+    public function changePassword(\Illuminate\Http\Request $request)
+    {
+        // ตรวจสอบความถูกต้อง
+        $request->validate([
+            'current_password' => 'required', // ต้องกรอกรหัสเดิม
+            'new_password' => 'required|min:8|confirmed', // รหัสใหม่ต้อง 8 ตัวขึ้นไป + ต้องตรงกับช่องยืนยัน
+        ]);
+
+        // เช็คว่า "รหัสผ่านเดิม" ที่กรอกมา ถูกต้องไหม?
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, auth()->user()->password)) {
+            // ถ้าไม่ถูก ให้เด้งกลับไปฟ้อง error
+            return back()->withErrors(['current_password' => 'รหัสผ่านปัจจุบันไม่ถูกต้องครับ']);
+        }
+
+        // ถ้าทุกอย่างผ่าน -> บันทึกรหัสใหม่
+        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->new_password);
+        $user->save();
+
+        return back()->with('success', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!');
+    }
 }

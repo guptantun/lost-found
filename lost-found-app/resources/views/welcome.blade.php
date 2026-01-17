@@ -15,6 +15,20 @@
         body { font-family: 'Prompt', sans-serif; } 
         /* แก้ไข z-index ของแผนที่เพื่อให้แสดงผลถูกต้อง */
         .leaflet-container { z-index: 0; }
+        
+        /* เพิ่ม Animation ให้ Dropdown */
+        .dropdown-menu {
+            display: none;
+            transform-origin: top right;
+        }
+        .group:hover .dropdown-menu {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -35,17 +49,43 @@
                             <i class="fa-solid fa-comment-dots text-xl"></i>
                         </a>
 
-                        <div class="hidden md:flex items-center gap-2 text-gray-600 mr-2 border-l pl-4 border-gray-200">
-                            <i class="fa-solid fa-user-circle text-xl"></i>
-                            <span class="font-medium">คุณ {{ Auth::user()->name }}</span>
-                        </div>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="text-gray-500 hover:text-red-600 transition font-medium text-sm">
-                                <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
+                        <div class="relative group ml-2 pl-4 border-l border-gray-200">
+                            <button class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition py-2">
+                                <div class="bg-indigo-50 text-indigo-600 rounded-full w-8 h-8 flex items-center justify-center">
+                                    <i class="fa-solid fa-user text-sm"></i>
+                                </div>
+                                <span class="font-medium">คุณ {{ Auth::user()->name }}</span>
+                                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 group-hover:rotate-180"></i>
                             </button>
-                        </form>
-                    @else
+
+                            <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                                
+                                <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                                    <p class="text-sm text-gray-500">เข้าสู่ระบบโดย</p>
+                                    <p class="text-sm font-bold text-gray-800 truncate">{{ Auth::user()->email }}</p>
+                                </div>
+
+                                <a href="{{ route('password.change') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                                    <i class="fa-solid fa-key mr-2 text-indigo-400 w-5"></i> เปลี่ยนรหัสผ่าน
+                                </a>
+
+                                @if(Auth::user()->is_admin)
+                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                                    <i class="fa-solid fa-shield-halved mr-2 text-indigo-400 w-5"></i> จัดการระบบ
+                                </a>
+                                @endif
+
+                                <div class="border-t border-gray-100"></div>
+
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left block px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition font-medium">
+                                        <i class="fa-solid fa-right-from-bracket mr-2 w-5"></i> ออกจากระบบ
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        @else
                         <a href="{{ route('login') }}" class="text-gray-600 hover:text-indigo-600 font-medium text-sm transition">เข้าสู่ระบบ</a>
                         <a href="{{ route('register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-md">
                             สมัครสมาชิก
@@ -146,7 +186,15 @@
                         </p>
                         
                         <div class="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">
-                            <span class="text-xs text-gray-500">โดย: {{ $item->user->name ?? $item->reporter_name }}</span>
+                            <span class="text-xs text-gray-500">โดย: 
+    @if($item->user)
+        <a href="{{ route('profile.show', $item->user->id) }}" class="hover:text-indigo-600 hover:underline font-bold transition z-20 relative">
+            {{ $item->user->name }}
+        </a>
+    @else
+        {{ $item->reporter_name }}
+    @endif
+</span>
                             <span class="text-indigo-600 text-sm font-semibold group-hover:underline">ดูข้อมูล <i class="fa-solid fa-arrow-right text-xs"></i></span>
                         </div>
                     </div>
