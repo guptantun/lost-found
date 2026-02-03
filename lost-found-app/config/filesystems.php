@@ -60,6 +60,11 @@ return [
             'report' => false,
         ],
 
+        // --- เพิ่มส่วนนี้สำหรับ Cloudinary ---
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+        ],
+
     ],
 
     /*

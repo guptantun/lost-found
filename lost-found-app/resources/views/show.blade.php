@@ -56,7 +56,8 @@
             
             <div class="relative h-96 bg-gray-200 group">
                 @if($item->image_path)
-                    <img src="{{ asset('storage/' . $item->image_path) }}" class="w-full h-full object-contain bg-black/5">
+                    {{-- ✅ แก้ไขตรงนี้: ลบ asset('storage/...') ออก ใช้ตัวแปรเพียวๆ เพราะเป็น URL จาก Cloudinary แล้ว --}}
+                    <img src="{{ $item->image_path }}" class="w-full h-full object-contain bg-black/5">
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 flex-col">
                         <i class="fa-regular fa-image text-6xl mb-4"></i>
@@ -140,15 +141,11 @@
                                 </div>
                                 <p class="text-gray-500 text-sm mb-1">ผู้ติดต่อ</p>
                                 
-                                {{-- ======================================================= --}}
-                                {{-- 🔥 แก้ไขตรงนี้: ใส่ลิงก์ไปหน้า Profile --}}
-                                {{-- ======================================================= --}}
                                 <h3 class="text-xl font-bold text-gray-900 mb-6">
                                     <a href="{{ route('profile.show', $item->user_id) }}" class="hover:text-indigo-600 hover:underline transition flex items-center justify-center gap-2">
                                         {{ $item->reporter_name }} <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400"></i>
                                     </a>
                                 </h3>
-                                {{-- ======================================================= --}}
                                 
                                 @auth
                                     @if(Auth::id() !== $item->user_id)

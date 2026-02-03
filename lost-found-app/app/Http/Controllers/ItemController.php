@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth; // เรียกใช้ Auth
+use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary; // ✅ เพิ่มบรรทัดนี้
 
 class ItemController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Item::with('user')->active()->latest(); // ดึงเฉพาะ active
+        $query = Item::with('user')->active()->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -55,11 +56,12 @@ class ItemController extends Controller
 
         $data = $request->all();
         
-        // [เพิ่ม] บันทึกว่าใครเป็นคนโพสต์
         $data['user_id'] = Auth::id(); 
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('items', 'public');
+            // ✅ แก้ไข: อัปโหลดขึ้น Cloudinary และขอ URL กลับมา
+            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('items')->getSecurePath();
+            $data['image_path'] = $uploadedFileUrl;
         }
 
         Item::create($data);
@@ -68,7 +70,6 @@ class ItemController extends Controller
 
     public function edit(Item $item)
     {
-        // ป้องกัน: ถ้าไม่ใช่เจ้าของห้ามแก้ไข
         if ($item->user_id !== Auth::id()) {
             abort(403, 'คุณไม่มีสิทธิ์แก้ไขโพสต์นี้');
         }
@@ -90,17 +91,16 @@ class ItemController extends Controller
             'reporter_name' => 'required',
             'phone_number' => 'required',
             'image' => 'nullable|image|max:5120',
-            // [เพิ่ม] รองรับการแก้ Status
             'status' => 'required|in:active,pending,returned,closed', 
         ]);
 
         $data = $request->all();
 
         if ($request->hasFile('image')) {
-            if ($item->image_path) {
-                Storage::disk('public')->delete($item->image_path);
-            }
-            $data['image_path'] = $request->file('image')->store('items', 'public');
+            // ✅ แก้ไข: อัปโหลดรูปใหม่ขึ้น Cloudinary
+            // (เราไม่ลบรูปเก่าใน Cloudinary เพื่อความง่าย และ URL เก่าจะถูกแทนที่ใน Database เอง)
+            $uploadedFileUrl = $request->file('image')->storeOnCloudinary('items')->getSecurePath();
+            $data['image_path'] = $uploadedFileUrl;
         }
 
         $item->update($data);
@@ -114,9 +114,8 @@ class ItemController extends Controller
             abort(403, 'คุณไม่มีสิทธิ์ลบโพสต์นี้');
         }
 
-        if ($item->image_path) {
-            Storage::disk('public')->delete($item->image_path);
-        }
+        // ✅ เอาโค้ดลบไฟล์ local ออก (เพราะไฟล์อยู่บน Cloudinary แล้ว และเราเก็บเป็น URL)
+        // ถ้าต้องการลบรูปบน Cloudinary ด้วย ต้องเก็บ public_id แต่เพื่อให้ง่าย เราปล่อยไว้ก่อน
         
         $item->delete();
         return redirect('/')->with('success', 'ลบประกาศเรียบร้อยแล้ว');
