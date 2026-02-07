@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use CloudinaryLabs\CloudinaryLaravel\MediaAlly; // ✅ 1. ต้องเติมบรรทัดนี้ (สำคัญมาก)
 
 class Item extends Model
 {
     use HasFactory, SoftDeletes;
+    use MediaAlly; // ✅ 2. ต้องเติมบรรทัดนี้ในตัว Class ด้วย
 
     // อนุญาตให้แก้ไขข้อมูลในคอลัมน์เหล่านี้ได้
     protected $fillable = [
@@ -33,7 +35,6 @@ class Item extends Model
         'event_date' => 'date',
     ];
 
-    // --- ส่วนที่ขาดไป (ตัวแก้ Error) ---
     // Scope นี้จะช่วยกรองเอาเฉพาะรายการที่สถานะเป็น active
     public function scopeActive($query)
     {
