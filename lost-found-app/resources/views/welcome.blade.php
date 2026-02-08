@@ -11,23 +11,22 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <script src="//unpkg.com/alpinejs" defer></script>
 
     <style> 
         body { font-family: 'Prompt', sans-serif; } 
         
-        /* แก้ไข z-index ของแผนที่เพื่อให้แสดงผลถูกต้อง ไม่บัง Modal */
+        /* แก้ไข z-index ของแผนที่ */
         .leaflet-container { z-index: 1 !important; }
-        
-        /* Animation Dropdown */
-        .dropdown-menu { display: none; transform-origin: top right; }
-        .group:hover .dropdown-menu { display: block; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
         /* Custom Scrollbar for Modal */
         .modal-scroll::-webkit-scrollbar { width: 8px; }
         .modal-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
         .modal-scroll::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -44,16 +43,25 @@
                 
                 <div class="flex items-center gap-4">
                     @auth
-                        <div class="relative group ml-2 pl-4 border-l border-gray-200">
-                            <button class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition py-2">
+                        <div x-data="{ open: false }" class="relative ml-2 pl-4 border-l border-gray-200">
+                            <button @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition py-2 outline-none">
                                 <div class="bg-indigo-50 text-indigo-600 rounded-full w-8 h-8 flex items-center justify-center">
                                     <i class="fa-solid fa-user text-sm"></i>
                                 </div>
                                 <span class="font-medium">คุณ {{ Auth::user()->name }}</span>
-                                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 group-hover:rotate-180"></i>
+                                <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="{'rotate-180': open}"></i>
                             </button>
 
-                            <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50" 
+                                 style="display: none;">
+                                
                                 <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
                                     <p class="text-sm text-gray-500">เข้าสู่ระบบโดย</p>
                                     <p class="text-sm font-bold text-gray-800 truncate">{{ Auth::user()->email }}</p>
@@ -153,7 +161,10 @@
 
                     <div class="h-48 bg-gray-200 overflow-hidden relative">
                         @if($item->image_path)
-                            <img src="{{ $item->image_path }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $item->title }}">
+                            <img src="{{ $item->image_path }}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                                 alt="{{ $item->title }}"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=No+Image';">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
                                 <i class="fa-regular fa-image text-4xl"></i>
@@ -301,20 +312,20 @@
 
         function openModal() {
             const modal = document.getElementById('postModal');
-            modal.classList.remove('hidden');
-            
-            // รอให้ Modal แสดงผลก่อนค่อยโหลดแมพ
-            setTimeout(function() {
-                if (!map) {
+            if(modal) {
+                modal.classList.remove('hidden');
+                
+                // รอให้ Modal แสดงผลก่อนค่อยโหลดแมพ
+                setTimeout(function() {
                     initMap();
-                } else {
-                    map.invalidateSize(); // รีเฟรชขนาดแมพหากเคยโหลดแล้ว
-                }
-            }, 300);
+                    if(map) map.invalidateSize(); 
+                }, 300);
+            }
         }
 
         function closeModal() {
-            document.getElementById('postModal').classList.add('hidden');
+            const modal = document.getElementById('postModal');
+            if(modal) modal.classList.add('hidden');
         }
 
         function initMap() {
@@ -323,6 +334,9 @@
 
             // ตรวจสอบว่ามีแมพอยู่แล้วหรือไม่
             if(map !== null) return;
+            
+            var mapContainer = document.getElementById('map-create');
+            if(!mapContainer) return; // ป้องกัน error ถ้าไม่มี element
 
             map = L.map('map-create').setView([defaultLat, defaultLng], 13);
 

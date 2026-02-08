@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Storage; // ✅ เพิ่มบรรทัดนี้เพื่อจัดการไฟล์
 
 class ItemController extends Controller
 {
@@ -68,13 +68,13 @@ class ItemController extends Controller
         $data['user_id'] = Auth::id(); // ใส่ ID ของคนโพสต์
         $data['status'] = 'active'; // กำหนดสถานะเริ่มต้น
 
-        // 3. จัดการอัปโหลดรูป (Cloudinary V3)
+        // 3. จัดการอัปโหลดรูป (Local Storage) ✅ แก้ไขใหม่
         if ($request->hasFile('image')) {
-            // อัปโหลดไปที่โฟลเดอร์ 'lost-found-items' บน Cloudinary
-            $uploadedFile = $request->file('image')->storeOnCloudinary('lost-found-items');
+            // อัปโหลดไปที่โฟลเดอร์ storage/app/public/lost-found-items
+            $path = $request->file('image')->store('lost-found-items', 'public');
             
-            // ดึง URL ที่เป็น https มาเก็บลงตัวแปร
-            $data['image_path'] = $uploadedFile->getSecurePath();
+            // สร้าง URL สำหรับเรียกดูรูป (จะได้เป็น /storage/lost-found-items/ชื่อไฟล์.jpg)
+            $data['image_path'] = Storage::url($path);
         }
 
         // 4. บันทึกลงฐานข้อมูล
@@ -114,14 +114,20 @@ class ItemController extends Controller
 
         $data = $request->all();
 
-        // จัดการอัปโหลดรูปใหม่ (ถ้ามีการเปลี่ยนรูป)
+        // จัดการอัปโหลดรูปใหม่ (ถ้ามีการเปลี่ยนรูป) ✅ แก้ไขใหม่
         if ($request->hasFile('image')) {
-            // อัปโหลดรูปใหม่
-           // 1. อัปโหลดด้วยคำสั่ง store ธรรมดา แต่ระบุ disk เป็น cloudinary
-$path = $request->file('image')->store('lost-found-items', 'cloudinary');
+            // ลบรูปเก่าทิ้งก่อน (ถ้ามี) เพื่อไม่ให้รกเครื่อง
+            if ($item->image_path) {
+                // แปลง URL กลับเป็น Path เพื่อลบไฟล์
+                $oldPath = str_replace('/storage/', '', $item->image_path);
+                Storage::disk('public')->delete($oldPath);
+            }
 
-// 2. ดึง URL ของรูปมาเก็บ
-$data['image_path'] = \Illuminate\Support\Facades\Storage::disk('cloudinary')->url($path);
+            // อัปโหลดรูปใหม่
+            $path = $request->file('image')->store('lost-found-items', 'public');
+            
+            // เก็บ URL ใหม่
+            $data['image_path'] = Storage::url($path);
         }
 
         // อัปเดตข้อมูลลงฐานข้อมูล
@@ -137,7 +143,13 @@ $data['image_path'] = \Illuminate\Support\Facades\Storage::disk('cloudinary')->u
             abort(403, 'คุณไม่มีสิทธิ์ลบโพสต์นี้');
         }
         
-        // ลบข้อมูลจากฐานข้อมูล (รูปบน Cloudinary ปล่อยไว้ หรือจะใช้ Admin ลบทีหลังก็ได้)
+        // ลบรูปภาพออกจากเครื่องด้วย ✅ เพิ่มส่วนนี้
+        if ($item->image_path) {
+            $path = str_replace('/storage/', '', $item->image_path);
+            Storage::disk('public')->delete($path);
+        }
+
+        // ลบข้อมูลจากฐานข้อมูล
         $item->delete();
 
         return redirect('/')->with('success', 'ลบประกาศเรียบร้อยแล้ว');
