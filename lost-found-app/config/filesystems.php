@@ -60,16 +60,15 @@ return [
             'report' => false,
         ],
 
-        // --- แก้ไขส่วนนี้ให้ถูกต้อง ---
+        // --- ส่วนที่แก้ไข: ใส่รหัสสำรองกันพลาด ---
         'cloudinary' => [
             'driver' => 'cloudinary',
-            'cloud' => [
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'api_key'    => env('CLOUDINARY_API_KEY'),
-                'api_secret' => env('CLOUDINARY_API_SECRET'),
-            ],
+            // ใส่รหัสตรงนี้เป็นค่าสำรอง กรณีที่ Render อ่านค่า env ไม่เจอ
+            'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'daprovw5s'),
+            'api_key'    => env('CLOUDINARY_API_KEY', '333297192191222'),
+            'api_secret' => env('CLOUDINARY_API_SECRET', 'z7O07VHR_tO1TJa1VaU85Q2HeTM'),
             'url' => [
-                'secure' => true, // บังคับใช้ HTTPS
+                'secure' => true,
             ],
         ],
 
