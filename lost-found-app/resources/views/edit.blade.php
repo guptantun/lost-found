@@ -3,128 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แก้ไขประกาศ - {{ $item->title }}</title>
+    <title>แก้ไขข้อมูล - {{ $item->title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style> body { font-family: 'Prompt', sans-serif; } </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="max-w-3xl mx-auto py-10 px-4">
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
-                <h1 class="text-white text-xl font-bold"><i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูลประกาศ</h1>
-                <a href="{{ route('items.show', $item->id) }}" class="text-indigo-100 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></a>
+    <div class="max-w-2xl mx-auto py-10 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">แก้ไขข้อมูลประกาศ</h2>
+                <a href="{{ route('items.show', $item->id) }}" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-xmark text-xl"></i> ยกเลิก
+                </a>
             </div>
-
-            <form action="{{ route('items.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+            
+            <form action="{{ route('items.update', $item->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 @method('PUT')
 
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">สถานะประกาศ</label>
-                    <select name="status" class="w-full rounded-lg border-gray-300 border p-2 bg-gray-50 focus:ring-indigo-500">
-                        <option value="active" {{ $item->status == 'active' ? 'selected' : '' }}>🟢 กำลังประกาศ (Active)</option>
-                        <option value="returned" {{ $item->status == 'returned' ? 'selected' : '' }}>🤝 ส่งคืนเจ้าของแล้ว (Returned)</option>
+                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                    <label class="block text-sm font-bold text-indigo-900 mb-2">สถานะปัจจุบัน</label>
+                    <select name="status" class="w-full rounded-lg border-indigo-300 border shadow-sm p-2 focus:ring-indigo-500">
+                        <option value="active" {{ $item->status == 'active' ? 'selected' : '' }}>🟢 กำลังตามหา / ประกาศอยู่ (Active)</option>
+                        <option value="returned" {{ $item->status == 'returned' ? 'selected' : '' }}>🤝 คืนของเรียบร้อยแล้ว (Returned)</option>
                         <option value="closed" {{ $item->status == 'closed' ? 'selected' : '' }}>🔴 ปิดประกาศ (Closed)</option>
                     </select>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 bg-gray-100 p-1 rounded-lg">
+                    <label class="cursor-pointer text-center">
+                        <input type="radio" name="type" value="lost" class="peer sr-only" {{ $item->type == 'lost' ? 'checked' : '' }}>
+                        <div class="py-2 text-sm font-medium rounded-md text-gray-500 peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm transition">แจ้งของหาย</div>
+                    </label>
+                    <label class="cursor-pointer text-center">
+                        <input type="radio" name="type" value="found" class="peer sr-only" {{ $item->type == 'found' ? 'checked' : '' }}>
+                        <div class="py-2 text-sm font-medium rounded-md text-gray-500 peer-checked:bg-white peer-checked:text-green-600 peer-checked:shadow-sm transition">แจ้งเจอของ</div>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อประกาศ</label>
+                    <input type="text" name="title" value="{{ $item->title }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
-                        <select name="type" class="w-full rounded-lg border-gray-300 border p-2">
-                            <option value="lost" {{ $item->type == 'lost' ? 'selected' : '' }}>ของหาย</option>
-                            <option value="found" {{ $item->type == 'found' ? 'selected' : '' }}>เจอของ</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
+                        <select name="category" class="w-full rounded-lg border-gray-300 border shadow-sm p-2 bg-white">
+                            @foreach(['wallet'=>'กระเป๋าเงิน', 'electronics'=>'มือถือ/IT', 'documents'=>'เอกสาร', 'pets'=>'สัตว์เลี้ยง', 'clothing'=>'เสื้อผ้า', 'others'=>'อื่นๆ'] as $key => $label)
+                                <option value="{{ $key }}" {{ $item->category == $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
-                        <select name="category" class="w-full rounded-lg border-gray-300 border p-2">
-                            <option value="wallet" {{ $item->category == 'wallet' ? 'selected' : '' }}>กระเป๋าเงิน</option>
-                            <option value="electronics" {{ $item->category == 'electronics' ? 'selected' : '' }}>มือถือ/IT</option>
-                            <option value="documents" {{ $item->category == 'documents' ? 'selected' : '' }}>เอกสาร</option>
-                            <option value="pets" {{ $item->category == 'pets' ? 'selected' : '' }}>สัตว์เลี้ยง</option>
-                            <option value="clothing" {{ $item->category == 'clothing' ? 'selected' : '' }}>เสื้อผ้า</option>
-                            <option value="others" {{ $item->category == 'others' ? 'selected' : '' }}>อื่นๆ</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">จังหวัด</label>
+                        <input type="text" name="province" value="{{ $item->province }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อ</label>
-                    <input type="text" name="title" value="{{ $item->title }}" required class="w-full rounded-lg border p-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่</label>
+                    <input type="text" name="location_text" value="{{ $item->location_text }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เกิดเหตุ</label>
+                    <input type="date" name="event_date" value="{{ $item->event_date->format('Y-m-d') }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label>
-                    <textarea name="description" rows="4" class="w-full rounded-lg border p-2">{{ $item->description }}</textarea>
+                    <textarea name="description" rows="3" class="w-full rounded-lg border-gray-300 border shadow-sm p-2">{{ $item->description }}</textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่ระบุ</label>
-                    <input type="text" name="location_text" value="{{ $item->location_text }}" required class="w-full rounded-lg border p-2 mb-2">
-                    <div id="map-edit" class="w-full h-64 rounded-lg border border-gray-300"></div>
-                    <input type="hidden" name="latitude" id="lat" value="{{ $item->latitude }}">
-                    <input type="hidden" name="longitude" id="lng" value="{{ $item->longitude }}">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">เปลี่ยนรูปภาพ (ถ้ามี)</label>
+                    <input type="file" name="image" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ (อัปโหลดใหม่เพื่อเปลี่ยน)</label>
-                    @if($item->image_path)
-                        <div class="mb-2">
-                            <img src="{{ $item->image_path }}" class="h-32 rounded-lg border shadow-sm">
-                        </div>
-                    @endif
-                    <input type="file" name="image" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700">
+                <div class="border-t pt-4 grid grid-cols-2 gap-3">
+                    <input type="text" name="reporter_name" value="{{ $item->reporter_name }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2" placeholder="ชื่อผู้ติดต่อ">
+                    <input type="text" name="phone_number" value="{{ $item->phone_number }}" class="w-full rounded-lg border-gray-300 border shadow-sm p-2" placeholder="เบอร์โทร">
                 </div>
-                
-                <hr>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ติดต่อ</label>
-                        <input type="text" name="reporter_name" value="{{ $item->reporter_name }}" required class="w-full rounded-lg border p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทร</label>
-                        <input type="text" name="phone_number" value="{{ $item->phone_number }}" required class="w-full rounded-lg border p-2">
-                    </div>
-                </div>
-                
-                <input type="hidden" name="event_date" value="{{ $item->event_date }}">
-
-                <div class="flex justify-end gap-3 pt-4">
-                    <a href="{{ route('items.show', $item->id) }}" class="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">ยกเลิก</a>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg">บันทึกการแก้ไข</button>
-                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 shadow-lg transition">
+                    บันทึกการแก้ไข
+                </button>
             </form>
         </div>
     </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        var lat = {{ $item->latitude ?? 13.7563 }};
-        var lng = {{ $item->longitude ?? 100.5018 }};
-        
-        var map = L.map('map-edit').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        
-        var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-
-        marker.on('dragend', function(e) {
-            var position = marker.getLatLng();
-            document.getElementById('lat').value = position.lat;
-            document.getElementById('lng').value = position.lng;
-        });
-
-        map.on('click', function(e) {
-            marker.setLatLng(e.latlng);
-            document.getElementById('lat').value = e.latlng.lat;
-            document.getElementById('lng').value = e.latlng.lng;
-        });
-    </script>
 </body>
 </html>
