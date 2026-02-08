@@ -38,16 +38,10 @@ return [
 
         // --- จุดที่แก้ไข (ถูกต้อง 100%) ---
         'cloudinary' => [
-            'driver' => 'cloudinary',
-            'cloud' => [
-                 // ใส่รหัสตรงๆ เพื่อความชัวร์
-                'cloud_name' => 'daprovw5s', 
-                'api_key'    => '333297192191222', 
-                'api_secret' => 'z7O07VHR_tO1TJa1VaU85Q2HeTM',
-            ],
-            'url' => [
-                'secure' => true,
-            ],
+    'driver' => 'cloudinary',
+    'url' => [
+        'secure' => true,
+    ],
         ],
         // -------------------------------
 
