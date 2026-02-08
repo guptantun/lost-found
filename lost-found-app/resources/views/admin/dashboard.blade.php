@@ -264,7 +264,7 @@
                             </form>
                         </div>
 
-                         <div class="pt-4 mt-4 border-t border-slate-700">
+                        <div class="pt-4 mt-4 border-t border-slate-700">
                             <p class="text-xs text-slate-400 mb-2 font-bold uppercase">ค้นหาของหายด่วน</p>
                             <form action="{{ route('admin.items') }}" method="GET" class="flex gap-2">
                                 <input type="text" name="search" placeholder="iPhone, กุญแจ..." class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 placeholder-slate-600">
@@ -280,12 +280,12 @@
         </div>
     </main>
 
-    <form id="deleteForm" method="POST" class="hidden">
+    <form id="deleteForm" method="POST" class="hidden" action="">
         @csrf
         @method('DELETE')
     </form>
 
-    <form id="postForm" method="POST" class="hidden">
+    <form id="postForm" method="POST" class="hidden" action="">
         @csrf
     </form>
 
@@ -304,7 +304,7 @@
             });
         @endif
 
-        // 2. Popup ยืนยันการลบ (ใช้ deleteForm)
+        // 2. Popup ยืนยันการลบ (ใช้ deleteForm - DELETE Method)
         function confirmDelete(url) {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
@@ -319,7 +319,6 @@
                 customClass: { popup: 'rounded-2xl shadow-xl' }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // [แก้ไข] เรียกใช้ ID deleteForm
                     let form = document.getElementById('deleteForm'); 
                     form.action = url;
                     form.submit();
@@ -327,7 +326,7 @@
             })
         }
 
-        // 3. Popup ยืนยันการกระทำทั่วไป (เช่น ยกฟ้อง) (ใช้ postForm)
+        // 3. Popup ยืนยันการกระทำทั่วไป (ใช้ postForm - POST Method)
         function confirmAction(url, title, text) {
             Swal.fire({
                 title: title,
@@ -340,7 +339,6 @@
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // [แก้ไข] เรียกใช้ ID postForm (ไม่มี @method DELETE)
                     let form = document.getElementById('postForm'); 
                     form.action = url;
                     form.submit();

@@ -50,7 +50,12 @@ Route::middleware('auth')->group(function () {
     // ออกจากระบบ
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // --- เปลี่ยนรหัสผ่าน (ถ้าต้องการเก็บฟังก์ชันนี้ไว้) ---
+    // --- จัดการโปรไฟล์ส่วนตัว (แก้ไขส่วนนี้เพื่อแก้ Error Route not defined) ---
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // --- เปลี่ยนรหัสผ่าน ---
     Route::get('/change-password', [ProfileController::class, 'showChangePasswordForm'])->name('password.change');
     Route::post('/change-password', [ProfileController::class, 'updatePassword'])->name('password.update');
 
@@ -85,16 +90,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // จัดการผู้ใช้
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('delete_user');
+    Route::post('/users/{id}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle_admin');
     
     // จัดการประกาศ
     Route::get('/items', [AdminController::class, 'items'])->name('items');
     Route::delete('/items/{id}', [AdminController::class, 'deleteItem'])->name('delete_item');
     
-    // จัดการรายงาน
+    // จัดการรายงาน (ใช้ POST เพราะใน Blade ใช้ฟอร์ม #postForm)
     Route::post('/reports/{id}/dismiss', [AdminController::class, 'dismissReport'])->name('dismiss_report');
-    Route::post('/users/{id}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('toggle_admin');
 });
-
 
 
 // ================================================================
