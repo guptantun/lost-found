@@ -12,27 +12,46 @@
 </head>
 <body class="bg-slate-100 flex h-screen overflow-hidden">
 
-    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex">
+    <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-20 hidden md:flex animate__animated animate__slideInLeft">
         <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-950">
-            <i class="fa-solid fa-shield-cat text-2xl mr-2"></i>
-            <span class="text-lg font-bold text-yellow-500">ADMIN CENTER</span>
+            <div class="flex items-center gap-2 text-yellow-500">
+                <i class="fa-solid fa-shield-cat text-2xl"></i>
+                <span class="text-lg font-bold tracking-wide text-white">ADMIN CENTER</span>
+            </div>
         </div>
+
         <nav class="flex-1 px-3 py-6 space-y-2">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition">
-                <i class="fa-solid fa-chart-pie w-6"></i> ภาพรวม
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl text-white shadow-lg transform transition hover:scale-105">
+                <i class="fa-solid fa-chart-pie w-6 text-center"></i> ภาพรวมระบบ
             </a>
-            <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-4 py-3 bg-indigo-600 text-white rounded-xl shadow-lg">
-                <i class="fa-solid fa-users w-6"></i> จัดการสมาชิก
+            
+            <a href="{{ route('home') }}" target="_blank" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition">
+                <i class="fa-solid fa-globe w-6 text-center"></i> หน้าเว็บไซต์หลัก
             </a>
-            <a href="{{ route('admin.items') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition">
-                <i class="fa-solid fa-box-archive w-6"></i> จัดการประกาศ
+            
+            <div class="pt-6 pb-2">
+                <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Management</p>
+            </div>
+            
+            <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition">
+                <i class="fa-solid fa-users-gear w-6 text-center"></i> จัดการสมาชิก
             </a>
-            <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition mt-auto">
-                <i class="fa-solid fa-house w-6"></i> ไปหน้าเว็บไซต์
+            
+            <a href="{{ route('admin.items') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition">
+                <i class="fa-solid fa-box-archive w-6 text-center"></i> ฐานข้อมูลของหาย
             </a>
         </nav>
-    </aside>
 
+        <div class="p-4 border-t border-slate-800 bg-slate-900">
+            <div class="flex items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=random" class="w-10 h-10 rounded-full border-2 border-slate-600">
+                <div>
+                    <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
+                    <p class="text-xs text-green-400"><i class="fa-solid fa-circle text-[8px] mr-1"></i>Online</p>
+                </div>
+            </div>
+        </div>
+    </aside>
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="h-16 bg-white shadow-sm flex justify-between items-center px-8">
             <h2 class="text-xl font-bold text-slate-700">จัดการสมาชิก (User Management)</h2>
