@@ -2,31 +2,7 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default Filesystem Disk
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the default filesystem disk that should be used
-    | by the framework. The "local" disk, as well as a variety of cloud
-    | based disks are available to your application for file storage.
-    |
-    */
-
     'default' => env('FILESYSTEM_DISK', 'local'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filesystem Disks
-    |--------------------------------------------------------------------------
-    |
-    | Below you may configure as many filesystem disks as necessary, and you
-    | may even configure multiple disks for the same driver. Examples for
-    | most supported storage drivers are configured here for reference.
-    |
-    | Supported drivers: "local", "ftp", "sftp", "s3"
-    |
-    */
 
     'disks' => [
 
@@ -60,30 +36,17 @@ return [
             'report' => false,
         ],
 
-        // --- ส่วนที่แก้ไข: ใส่รหัสสำรองกันพลาด ---
+        // --- แก้ไขตรงนี้ครับ (เอา cloud => [] ออก) ---
         'cloudinary' => [
             'driver' => 'cloudinary',
-            // ใส่รหัสตรงนี้เป็นค่าสำรอง กรณีที่ Render อ่านค่า env ไม่เจอ
-            'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'daprovw5s'),
-            'api_key'    => env('CLOUDINARY_API_KEY', '333297192191222'),
-            'api_secret' => env('CLOUDINARY_API_SECRET', 'z7O07VHR_tO1TJa1VaU85Q2HeTM'),
-            'url' => [
-                'secure' => true,
-            ],
+            // วางค่า Config ไว้ชั้นนอกสุด ห้ามมี array ซ้อน
+            'cloud_name' => 'daprovw5s', 
+            'api_key'    => '333297192191222', 
+            'api_secret' => 'z7O07VHR_tO1TJa1VaU85Q2HeTM',
+            'secure'     => true,
         ],
 
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Symbolic Links
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
-    |
-    */
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
