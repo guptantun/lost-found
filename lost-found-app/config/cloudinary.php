@@ -1,12 +1,7 @@
-<?php
+<?php 
 
 /*
  * This file is part of the Cloudinary Laravel Package.
- *
- * (c) Cloudinary <support@cloudinary.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
  */
 
 return [
@@ -15,37 +10,24 @@ return [
     |--------------------------------------------------------------------------
     | Cloudinary Configuration
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Cloudinary settings. Cloudinary is a cloud
-    | service that offers a solution to a web application's entire image
-    | management pipeline.
-    |
     */
 
-    'cloud_url' => env('CLOUDINARY_URL'),
+    // ❌ ของเดิม: 'cloud_url' => env('CLOUDINARY_URL'),
+    // ✅ ของใหม่: ใส่รหัสตรงๆ (สังเกตว่าไม่มี < > และไม่มีคำว่า CLOUDINARY_URL=)
+    'cloud_url' => 'cloudinary://333297192191222:z7O07VHR_tO1TJa1VaU85Q2HeTM@daprovw5s',
 
     /*
     |--------------------------------------------------------------------------
-    | Cloudinary Configuration
+    | Notification URL (อันนี้ปล่อยไว้เหมือนเดิมได้ หรือถ้าไม่ได้ใช้ก็ปล่อยว่าง)
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Cloudinary settings. Cloudinary is a cloud
-    | service that offers a solution to a web application's entire image
-    | management pipeline.
-    |
     */
-
     'notification_url' => env('CLOUDINARY_NOTIFICATION_URL'),
 
     /*
     |--------------------------------------------------------------------------
     | Upload Configuration
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Cloudinary Upload settings.
-    |
     */
-
     'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
 
     'upload_route' => env('CLOUDINARY_UPLOAD_ROUTE'),
