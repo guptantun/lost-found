@@ -280,9 +280,13 @@
         </div>
     </main>
 
-    <form id="actionForm" method="POST" class="hidden">
+    <form id="deleteForm" method="POST" class="hidden">
         @csrf
         @method('DELETE')
+    </form>
+
+    <form id="postForm" method="POST" class="hidden">
+        @csrf
     </form>
 
     <script>
@@ -300,7 +304,7 @@
             });
         @endif
 
-        // 2. Popup ยืนยันการลบ
+        // 2. Popup ยืนยันการลบ (ใช้ deleteForm)
         function confirmDelete(url) {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
@@ -315,14 +319,15 @@
                 customClass: { popup: 'rounded-2xl shadow-xl' }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let form = document.getElementById('actionForm');
+                    // [แก้ไข] เรียกใช้ ID deleteForm
+                    let form = document.getElementById('deleteForm'); 
                     form.action = url;
                     form.submit();
                 }
             })
         }
 
-        // 3. Popup ยืนยันการกระทำทั่วไป (เช่น ยกฟ้อง)
+        // 3. Popup ยืนยันการกระทำทั่วไป (เช่น ยกฟ้อง) (ใช้ postForm)
         function confirmAction(url, title, text) {
             Swal.fire({
                 title: title,
@@ -335,7 +340,8 @@
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let form = document.getElementById('actionForm');
+                    // [แก้ไข] เรียกใช้ ID postForm (ไม่มี @method DELETE)
+                    let form = document.getElementById('postForm'); 
                     form.action = url;
                     form.submit();
                 }
