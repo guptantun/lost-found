@@ -117,10 +117,11 @@ class ItemController extends Controller
         // จัดการอัปโหลดรูปใหม่ (ถ้ามีการเปลี่ยนรูป)
         if ($request->hasFile('image')) {
             // อัปโหลดรูปใหม่
-            $uploadedFile = $request->file('image')->storeOnCloudinary('lost-found-items');
-            
-            // เอา URL ใหม่ไปทับของเดิม
-            $data['image_path'] = $uploadedFile->getSecurePath();
+           // 1. อัปโหลดด้วยคำสั่ง store ธรรมดา แต่ระบุ disk เป็น cloudinary
+$path = $request->file('image')->store('lost-found-items', 'cloudinary');
+
+// 2. ดึง URL ของรูปมาเก็บ
+$data['image_path'] = \Illuminate\Support\Facades\Storage::disk('cloudinary')->url($path);
         }
 
         // อัปเดตข้อมูลลงฐานข้อมูล
