@@ -60,9 +60,17 @@ return [
             'report' => false,
         ],
 
-        // --- เพิ่มส่วนนี้สำหรับ Cloudinary ---
+        // --- แก้ไขส่วนนี้ให้ถูกต้อง ---
         'cloudinary' => [
             'driver' => 'cloudinary',
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key'    => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+            'url' => [
+                'secure' => true, // บังคับใช้ HTTPS
+            ],
         ],
 
     ],
