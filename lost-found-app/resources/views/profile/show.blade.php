@@ -21,7 +21,7 @@
                 
                 @auth
                     @if(Auth::id() === $user->id)
-                        <a href="{{ route('profile.edit') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-full shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2">
+                        <a href="#" class="bg-indigo-600 text-white px-5 py-2 rounded-full shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2">
                             <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล
                         </a>
                     @endif

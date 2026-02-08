@@ -56,8 +56,8 @@
             
             <div class="relative h-96 bg-gray-200 group">
                 @if($item->image_path)
-                    {{-- ✅ แก้ไขตรงนี้: ลบ asset('storage/...') ออก ใช้ตัวแปรเพียวๆ เพราะเป็น URL จาก Cloudinary แล้ว --}}
-                    <img src="{{ $item->image_path }}" class="w-full h-full object-contain bg-black/5">
+                    {{-- ✅ กลับมาใช้ asset('storage/...') สำหรับรูปใน Local Storage --}}
+                    <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-contain bg-black/5">
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 flex-col">
                         <i class="fa-regular fa-image text-6xl mb-4"></i>
