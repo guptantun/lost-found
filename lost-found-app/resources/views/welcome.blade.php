@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thai Lost & Found - ศูนย์รวมของหายได้คืน</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,13 +14,20 @@
 
     <style> 
         body { font-family: 'Prompt', sans-serif; } 
-        /* แก้ไข z-index ของแผนที่เพื่อให้แสดงผลถูกต้อง */
-        .leaflet-container { z-index: 0; }
+        
+        /* แก้ไข z-index ของแผนที่เพื่อให้แสดงผลถูกต้อง ไม่บัง Modal */
+        .leaflet-container { z-index: 1 !important; }
         
         /* Animation Dropdown */
         .dropdown-menu { display: none; transform-origin: top right; }
         .group:hover .dropdown-menu { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Custom Scrollbar for Modal */
+        .modal-scroll::-webkit-scrollbar { width: 8px; }
+        .modal-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+        .modal-scroll::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -36,10 +44,6 @@
                 
                 <div class="flex items-center gap-4">
                     @auth
-                        <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-indigo-600 transition p-2 mr-2" title="ข้อความของคุณ">
-                            <i class="fa-solid fa-comment-dots text-xl"></i>
-                        </a>
-
                         <div class="relative group ml-2 pl-4 border-l border-gray-200">
                             <button class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition py-2">
                                 <div class="bg-indigo-50 text-indigo-600 rounded-full w-8 h-8 flex items-center justify-center">
@@ -55,22 +59,7 @@
                                     <p class="text-sm font-bold text-gray-800 truncate">{{ Auth::user()->email }}</p>
                                 </div>
 
-                                <a href="{{ route('profile.show', Auth::id()) }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
-                                    <i class="fa-solid fa-id-card mr-2 text-indigo-400 w-5"></i> โปรไฟล์ของฉัน
-                                </a>
-
-                                <a href="{{ route('password.change') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
-                                    <i class="fa-solid fa-key mr-2 text-indigo-400 w-5"></i> เปลี่ยนรหัสผ่าน
-                                </a>
-
-                                @if(Auth::user()->is_admin)
-                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
-                                    <i class="fa-solid fa-shield-halved mr-2 text-indigo-400 w-5"></i> จัดการระบบ
-                                </a>
-                                @endif
-
                                 <div class="border-t border-gray-100"></div>
-
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf
                                     <button type="submit" class="w-full text-left block px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition font-medium">
@@ -113,14 +102,15 @@
             @endauth
             
             <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto mt-8 pt-8 border-t border-indigo-400/30">
-                <div><div class="text-2xl font-bold">{{ $items->count() }}</div><div class="text-xs opacity-75">ประกาศทั้งหมด</div></div>
-                <div><div class="text-2xl font-bold">{{ $items->where('type', 'lost')->count() }}</div><div class="text-xs opacity-75">ของหาย</div></div>
-                <div><div class="text-2xl font-bold">{{ $items->where('type', 'found')->count() }}</div><div class="text-xs opacity-75">เจอของ</div></div>
+                <div><div class="text-2xl font-bold">{{ $items->total() }}</div><div class="text-xs opacity-75">ประกาศทั้งหมด</div></div>
+                <div><div class="text-2xl font-bold">{{ $stats['lost'] ?? 0 }}</div><div class="text-xs opacity-75">ของหาย</div></div>
+                <div><div class="text-2xl font-bold">{{ $stats['found'] ?? 0 }}</div><div class="text-xs opacity-75">เจอของ</div></div>
             </div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        
         <div class="bg-white p-4 rounded-xl shadow-md mb-8 -mt-24 relative z-10 border border-gray-100" data-aos="fade-up">
             <form action="{{ route('home') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" name="search" placeholder="ค้นหา เช่น 'กระเป๋าตังค์ สยาม'..." value="{{ request('search') }}" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
@@ -137,6 +127,8 @@
                     <option value="electronics" {{ request('category') == 'electronics' ? 'selected' : '' }}>มือถือ/IT</option>
                     <option value="documents" {{ request('category') == 'documents' ? 'selected' : '' }}>เอกสาร</option>
                     <option value="pets" {{ request('category') == 'pets' ? 'selected' : '' }}>สัตว์เลี้ยง</option>
+                    <option value="clothing" {{ request('category') == 'clothing' ? 'selected' : '' }}>เสื้อผ้า</option>
+                    <option value="others" {{ request('category') == 'others' ? 'selected' : '' }}>อื่นๆ</option>
                 </select>
 
                 <button type="submit" class="bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2">
@@ -149,7 +141,7 @@
             @forelse($items as $item)
             <a href="{{ route('items.show', $item->id) }}" class="block group">
                 <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 h-full flex flex-col relative"
-                     data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                     data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
                     
                     <div class="absolute top-3 left-3 z-10">
                         @if($item->type == 'lost')
@@ -161,7 +153,7 @@
 
                     <div class="h-48 bg-gray-200 overflow-hidden relative">
                         @if($item->image_path)
-                            <img src="{{ asset('storage/' . $item->image_path) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <img src="{{ $item->image_path }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $item->title }}">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
                                 <i class="fa-regular fa-image text-4xl"></i>
@@ -182,13 +174,9 @@
                         
                         <div class="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">
                             <span class="text-xs text-gray-500">โดย: 
-                                @if($item->user)
-                                    <span class="hover:text-indigo-600 hover:underline font-bold transition z-20 relative" onclick="window.location='{{ route('profile.show', $item->user->id) }}'; return false;">
-                                        {{ $item->user->name }}
-                                    </span>
-                                @else
-                                    {{ $item->reporter_name }}
-                                @endif
+                                <span class="font-bold text-gray-700">
+                                    {{ $item->user ? $item->user->name : $item->reporter_name }}
+                                </span>
                             </span>
                             <span class="text-indigo-600 text-sm font-semibold group-hover:underline">ดูข้อมูล <i class="fa-solid fa-arrow-right text-xs"></i></span>
                         </div>
@@ -203,18 +191,19 @@
             @endforelse
         </div>
 
-        <div class="mt-8">
+        <div class="mt-8 px-4">
             {{ $items->links() }}
         </div>
     </div>
 
     @auth
-    <div id="postModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-fade-in-up">
-            <div class="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center z-10">
-                <h3 class="text-xl font-bold text-gray-800">สร้างประกาศใหม่</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition">
-                    <i class="fa-solid fa-xmark text-2xl"></i>
+    <div id="postModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-scroll shadow-2xl relative animate-fade-in-up">
+            
+            <div class="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center z-20 shadow-sm">
+                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-pen-to-square text-indigo-600 mr-2"></i>สร้างประกาศใหม่</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition bg-gray-100 hover:bg-red-50 rounded-full w-8 h-8 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             
@@ -224,15 +213,15 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="type" value="lost" class="peer sr-only" checked>
-                        <div class="border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl p-4 text-center transition hover:border-red-200">
-                            <i class="fa-solid fa-circle-exclamation text-2xl mb-2 text-red-500"></i>
+                        <div class="border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl p-4 text-center transition hover:border-red-200 h-full flex flex-col justify-center items-center">
+                            <i class="fa-solid fa-circle-exclamation text-3xl mb-2 text-red-500"></i>
                             <div class="font-bold text-gray-700">ประกาศของหาย</div>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="type" value="found" class="peer sr-only">
-                        <div class="border-2 border-gray-200 peer-checked:border-green-500 peer-checked:bg-green-50 rounded-xl p-4 text-center transition hover:border-green-200">
-                            <i class="fa-solid fa-hand-holding-heart text-2xl mb-2 text-green-500"></i>
+                        <div class="border-2 border-gray-200 peer-checked:border-green-500 peer-checked:bg-green-50 rounded-xl p-4 text-center transition hover:border-green-200 h-full flex flex-col justify-center items-center">
+                            <i class="fa-solid fa-hand-holding-heart text-3xl mb-2 text-green-500"></i>
                             <div class="font-bold text-gray-700">ประกาศเจอของ</div>
                         </div>
                     </label>
@@ -240,13 +229,13 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อประกาศ <span class="text-red-500">*</span></label>
-                    <input type="text" name="title" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500">
+                    <input type="text" name="title" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="ระบุสิ่งที่หายให้ชัดเจน">
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
-                        <select name="category" class="w-full rounded-lg border-gray-300 border p-2 bg-white">
+                        <select name="category" class="w-full rounded-lg border-gray-300 border p-2 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
                             <option value="wallet">กระเป๋าเงิน</option>
                             <option value="electronics">มือถือ / อุปกรณ์ IT</option>
                             <option value="documents">เอกสารราชการ</option>
@@ -257,16 +246,16 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เกิดเหตุ</label>
-                        <input type="date" name="event_date" required class="w-full rounded-lg border-gray-300 border p-2">
+                        <input type="date" name="event_date" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่ <span class="text-red-500">*</span></label>
-                    <input type="text" name="location_text" required class="w-full rounded-lg border-gray-300 border p-2 mb-2" placeholder="ระบุชื่อสถานที่ (เช่น หน้าเซเว่น สาขา...)">
+                    <input type="text" name="location_text" required class="w-full rounded-lg border-gray-300 border p-2 mb-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ระบุชื่อสถานที่ (เช่น หน้าเซเว่น สาขา...)">
                     
-                    <p class="text-xs text-indigo-600 mb-1"><i class="fa-solid fa-map-pin"></i> ลองลากหมุดไปจุดที่เกิดเหตุ</p>
-                    <div id="map-create" class="w-full h-64 rounded-lg border border-gray-300 z-0"></div>
+                    <p class="text-xs text-indigo-600 mb-2 bg-indigo-50 inline-block px-2 py-1 rounded"><i class="fa-solid fa-map-pin"></i> ลากหมุดเพื่อระบุพิกัดที่แม่นยำ</p>
+                    <div id="map-create" class="w-full h-64 rounded-lg border border-gray-300 z-0 shadow-inner"></div>
                     
                     <input type="hidden" name="latitude" id="lat">
                     <input type="hidden" name="longitude" id="lng">
@@ -274,25 +263,25 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดเพิ่มเติม</label>
-                    <textarea name="description" rows="3" class="w-full rounded-lg border-gray-300 border p-2"></textarea>
+                    <textarea name="description" rows="3" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="สี, ตำหนิ, ลักษณะเด่น..."></textarea>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รูปภาพประกอบ</label>
-                    <input type="file" name="image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <input type="file" name="image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-gray-200 rounded-full">
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <p class="text-sm font-bold text-gray-700 mb-3"><i class="fa-solid fa-address-card mr-1"></i> ข้อมูลติดต่อกลับ</p>
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="text" name="reporter_name" value="{{ Auth::user()->name }}" required class="w-full rounded-lg border-gray-300 border p-2" placeholder="ชื่อผู้ติดต่อ">
-                        <input type="text" name="phone_number" required class="w-full rounded-lg border-gray-300 border p-2" placeholder="เบอร์โทรศัพท์">
+                        <input type="text" name="reporter_name" value="{{ Auth::user()->name }}" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ชื่อผู้ติดต่อ">
+                        <input type="text" name="phone_number" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="เบอร์โทรศัพท์">
                     </div>
                 </div>
 
-                <div class="pt-2">
+                <div class="pt-2 sticky bottom-0 bg-white pb-2 z-10">
                     <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition transform hover:-translate-y-0.5">
-                        บันทึกข้อมูล
+                        <i class="fa-solid fa-save mr-2"></i> บันทึกข้อมูล
                     </button>
                 </div>
             </form>
@@ -307,17 +296,21 @@
         AOS.init({ duration: 800, once: true });
 
         // -- Modal & Map Logic --
-        var map, marker;
+        var map = null;
+        var marker = null;
 
         function openModal() {
-            document.getElementById('postModal').classList.remove('hidden');
+            const modal = document.getElementById('postModal');
+            modal.classList.remove('hidden');
+            
+            // รอให้ Modal แสดงผลก่อนค่อยโหลดแมพ
             setTimeout(function() {
                 if (!map) {
                     initMap();
                 } else {
-                    map.invalidateSize();
+                    map.invalidateSize(); // รีเฟรชขนาดแมพหากเคยโหลดแล้ว
                 }
-            }, 200);
+            }, 300);
         }
 
         function closeModal() {
@@ -328,6 +321,9 @@
             var defaultLat = 13.7563;
             var defaultLng = 100.5018;
 
+            // ตรวจสอบว่ามีแมพอยู่แล้วหรือไม่
+            if(map !== null) return;
+
             map = L.map('map-create').setView([defaultLat, defaultLng], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -336,21 +332,25 @@
 
             marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
 
+            // เมื่อลากหมุด
             marker.on('dragend', function(e) {
                 var position = marker.getLatLng();
                 document.getElementById('lat').value = position.lat;
                 document.getElementById('lng').value = position.lng;
             });
 
+            // เมื่อคลิกที่แผนที่
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 document.getElementById('lat').value = e.latlng.lat;
                 document.getElementById('lng').value = e.latlng.lng;
             });
 
+            // ตั้งค่าเริ่มต้น
             document.getElementById('lat').value = defaultLat;
             document.getElementById('lng').value = defaultLng;
 
+            // ขอพิกัดปัจจุบัน
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     var lat = position.coords.latitude;
@@ -363,15 +363,24 @@
             }
         }
 
-        // -- Alerts --
+        // ปิด Modal เมื่อคลิกพื้นที่ว่างข้างนอก
+        window.onclick = function(event) {
+            const modal = document.getElementById('postModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // -- SweetAlert2 Alerts --
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'สำเร็จ!',
                 text: "{{ session('success') }}",
                 timer: 2000,
-                showConfirmButton: false
-            })
+                showConfirmButton: false,
+                confirmButtonColor: '#4f46e5'
+            });
         @endif
 
         @if($errors->any())
@@ -379,8 +388,9 @@
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด',
                 text: '{{ $errors->first() }}',
-                confirmButtonText: 'ตกลง'
-            })
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#4f46e5'
+            });
         @endif
     </script>
 </body>

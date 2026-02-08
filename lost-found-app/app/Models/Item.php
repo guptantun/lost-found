@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use CloudinaryLabs\CloudinaryLaravel\MediaAlly; // ✅ 1. ต้องเติมบรรทัดนี้ (สำคัญมาก)
 
 class Item extends Model
 {
     use HasFactory, SoftDeletes;
-    use MediaAlly; // ✅ 2. ต้องเติมบรรทัดนี้ในตัว Class ด้วย
+
+    // ✅ สำหรับ Cloudinary v3.0: ไม่ต้องใส่ use MediaAlly ตรงนี้แล้วครับ
+    // เราจะบันทึกแค่ URL ลงใน database ธรรมดาเลย
 
     // อนุญาตให้แก้ไขข้อมูลในคอลัมน์เหล่านี้ได้
     protected $fillable = [
