@@ -136,4 +136,22 @@ class AdminController extends Controller
 
         return back()->with('success', 'ปรับสถานะเป็นตรวจสอบแล้ว (ยกฟ้อง)');
     }
+    // App/Http/Controllers/AdminController.php
+
+public function toggleAdmin($id)
+{
+    $user = \App\Models\User::findOrFail($id);
+    
+    // ป้องกันไม่ให้แก้ตัวเอง
+    if ($user->id === auth()->id()) {
+        return back()->with('error', 'คุณไม่สามารถเปลี่ยนแปลงสิทธิ์ของตัวเองได้');
+    }
+
+    // สลับสถานะ (ถ้าเป็น 1 ให้เป็น 0, ถ้าเป็น 0 ให้เป็น 1)
+    $user->is_admin = !$user->is_admin;
+    $user->save();
+
+    $status = $user->is_admin ? 'ตั้งเป็น Admin เรียบร้อย' : 'ปลดจาก Admin เรียบร้อย';
+    return back()->with('success', $status);
+}
 }

@@ -9,181 +9,148 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> body { font-family: 'Prompt', sans-serif; } </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 text-gray-800">
 
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                    <div class="bg-indigo-600 text-white p-2 rounded-lg"><i class="fa-solid fa-arrow-left"></i></div>
-                    <span class="font-bold text-gray-700">กลับหน้าหลัก</span>
+                <a href="{{ route('home') }}" class="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition group">
+                    <div class="bg-gray-100 group-hover:bg-indigo-600 group-hover:text-white text-gray-500 p-2 rounded-lg transition"><i class="fa-solid fa-arrow-left"></i></div>
+                    <span class="font-bold">กลับหน้าหลัก</span>
                 </a>
-                
-                @auth
-                    @if(Auth::id() === $user->id)
-                        <a href="#" class="bg-indigo-600 text-white px-5 py-2 rounded-full shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล
-                        </a>
-                    @endif
-                @endauth
             </div>
         </div>
     </nav>
 
-    <div class="h-48 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 relative">
-        <div class="absolute inset-0 bg-black/10"></div>
+    <div class="h-48 bg-gradient-to-r from-slate-700 via-gray-700 to-slate-800 relative">
+        <div class="absolute inset-0 bg-black/20"></div>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 pb-10">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 relative">
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
                     
-                    <div class="pt-8 pb-6 text-center bg-white">
+                    <div class="pt-8 pb-6 text-center">
                         <div class="relative inline-block">
-                            <div class="w-36 h-36 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 mx-auto flex items-center justify-center">
+                            <div class="w-32 h-32 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-100 mx-auto flex items-center justify-center">
                                 @if($user->avatar)
                                     <img src="{{ asset('storage/'.$user->avatar) }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="text-5xl font-bold text-gray-300 select-none">{{ substr($user->name, 0, 1) }}</span>
                                 @endif
                             </div>
-                            <div class="absolute bottom-2 right-2 bg-green-500 text-white w-8 h-8 rounded-full border-4 border-white flex items-center justify-center shadow-sm" title="ยืนยันตัวตนแล้ว">
-                                <i class="fa-solid fa-check text-xs"></i>
-                            </div>
                         </div>
-                        <h1 class="text-2xl font-bold text-gray-900 mt-4">{{ $user->name }}</h1>
-                        <p class="text-gray-500 text-sm">สมาชิกเมื่อ {{ $user->created_at->format('M Y') }}</p>
+                        <h1 class="text-xl font-bold text-gray-900 mt-3">{{ $user->name }}</h1>
+                        <p class="text-gray-500 text-xs mt-1">สมาชิกตั้งแต่ {{ $user->created_at->format('d M Y') }}</p>
                     </div>
 
-                    <div class="p-6 bg-gray-50 border-t border-gray-100 space-y-5">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">ช่องทางติดต่อ</h3>
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">ข้อมูลติดต่อ</h3>
 
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-indigo-500 shadow-sm"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
+                            <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600"><i class="fa-solid fa-envelope text-xs"></i></div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs text-gray-500 mb-0.5">อีเมล</p>
-                                @if(Auth::id() === $user->id)
-                                    <p class="text-sm font-medium text-gray-800 break-all">{{ $user->email }}</p>
-                                @else
-                                    <p class="text-sm text-gray-600">{{ Str::mask($user->email, '*', 3, strpos($user->email, '@') - 3) }}</p>
-                                @endif
+                                <p class="text-[10px] text-gray-400">อีเมล</p>
+                                <p class="text-sm font-medium text-gray-800 truncate">{{ $user->email }}</p>
                             </div>
                         </div>
 
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-green-500 shadow-sm"><i class="fa-solid fa-phone"></i></div>
+                        @if($user->phone)
+                        <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
+                            <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600"><i class="fa-solid fa-phone text-xs"></i></div>
                             <div class="flex-1">
-                                <p class="text-xs text-gray-500 mb-0.5">เบอร์โทรศัพท์</p>
-                                @if(Auth::id() === $user->id)
-                                    <p class="text-sm font-medium text-gray-800">{{ $user->phone ?? '-' }}</p>
-                                @else
-                                    <p class="text-sm text-gray-400 italic flex items-center gap-1">
-                                        <i class="fa-solid fa-lock text-xs"></i> ซ่อนเพื่อความปลอดภัย
-                                    </p>
-                                @endif
+                                <p class="text-[10px] text-gray-400">เบอร์โทรศัพท์</p>
+                                <p class="text-sm font-medium text-gray-800">{{ $user->phone }}</p>
                             </div>
                         </div>
+                        @endif
 
                         @if($user->line_id)
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-lg bg-green-500 flex items-center justify-center text-white shadow-sm"><i class="fa-brands fa-line text-xl"></i></div>
+                        <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fa-brands fa-line text-lg"></i></div>
                             <div class="flex-1">
-                                <p class="text-xs text-gray-500 mb-0.5">Line ID</p>
+                                <p class="text-[10px] text-gray-400">Line ID</p>
                                 <p class="text-sm font-medium text-gray-800">{{ $user->line_id }}</p>
                             </div>
                         </div>
                         @endif
 
                         @if($user->facebook)
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm"><i class="fa-brands fa-facebook-f text-lg"></i></div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500 mb-0.5">Facebook</p>
-                                <a href="{{ $user->facebook }}" target="_blank" class="text-sm font-medium text-blue-600 hover:underline truncate block">
-                                    เปิดลิงก์ Facebook <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i>
-                                </a>
+                        <a href="{{ $user->facebook }}" target="_blank" class="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 shadow-sm hover:bg-blue-50 transition group">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition"><i class="fa-brands fa-facebook-f text-xs"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] text-gray-400">Facebook</p>
+                                <p class="text-sm font-medium text-blue-600 truncate">ไปยังโปรไฟล์ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></p>
                             </div>
-                        </div>
+                        </a>
                         @endif
                     </div>
-                    
-                    @if(Auth::id() === $user->id)
-                        <div class="px-6 py-3 bg-indigo-50 text-center border-t border-indigo-100">
-                            <p class="text-xs text-indigo-700"><i class="fa-regular fa-eye"></i> คุณกำลังดูในมุมมองเจ้าของบัญชี</p>
-                        </div>
-                    @endif
                 </div>
             </div>
 
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-8">
                 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="w-1 h-6 bg-indigo-500 rounded-full block"></span>
-                        แนะนำตัว
-                    </h2>
-                    @if($user->bio)
-                        <p class="text-gray-600 leading-relaxed whitespace-pre-line text-lg">{{ $user->bio }}</p>
-                    @else
-                        <div class="p-6 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-center">
-                            <p class="text-gray-400">ยังไม่มีข้อมูลแนะนำตัว</p>
-                        </div>
-                    @endif
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                            <span class="w-1 h-6 bg-indigo-500 rounded-full block"></span>
-                            รายการประกาศ ({{ $user->items->count() }})
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 min-h-[500px]">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-ul text-indigo-500"></i>
+                            รายการประกาศทั้งหมด
                         </h2>
+                        <span class="text-xs font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">{{ $user->items->count() }} รายการ</span>
                     </div>
 
                     @if($user->items->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @foreach($user->items as $post)
-                            <a href="{{ route('items.show', $post->id) }}" class="group block bg-white rounded-xl shadow-sm hover:shadow-lg transition duration-300 border border-gray-100 overflow-hidden h-full flex flex-col">
-                                <div class="relative h-48 bg-gray-200 overflow-hidden">
+                            <a href="{{ route('items.show', $post->id) }}" class="group block bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 overflow-hidden h-full flex flex-col transition-all">
+                                <div class="relative h-40 bg-gray-200 overflow-hidden">
                                     @if($post->image_path)
-                                        <img src="{{ asset('storage/'.$post->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                        <img src="{{ asset('storage/'.$post->image_path) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
-                                        <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fa-regular fa-image text-4xl"></i></div>
+                                        <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                                            <i class="fa-regular fa-image text-3xl opacity-30"></i>
+                                        </div>
                                     @endif
                                     
-                                    <div class="absolute top-3 left-3">
-                                        <span class="px-3 py-1 rounded-full text-xs font-bold shadow-md {{ $post->type == 'lost' ? 'bg-red-500 text-white' : 'bg-green-500 text-white' }}">
+                                    <div class="absolute top-2 left-2">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold shadow-sm {{ $post->type == 'lost' ? 'bg-red-500 text-white' : 'bg-green-500 text-white' }}">
                                             {{ $post->type == 'lost' ? 'ตามหา' : 'เจอของ' }}
                                         </span>
                                     </div>
                                     @if($post->status == 'returned')
-                                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                            <span class="border-2 border-white text-white px-4 py-1 rounded font-bold uppercase tracking-wide">ปิดเคสแล้ว</span>
+                                        <div class="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
+                                            <span class="text-white text-xs font-bold border border-white px-2 py-1 rounded uppercase tracking-wider">ปิดเคสแล้ว</span>
                                         </div>
                                     @endif
                                 </div>
-                                <div class="p-4 flex-1 flex flex-col">
-                                    <h3 class="font-bold text-gray-900 text-lg mb-1 line-clamp-1 group-hover:text-indigo-600 transition">{{ $post->title }}</h3>
-                                    <p class="text-sm text-gray-500 mb-4 flex items-center">
-                                        <i class="fa-solid fa-location-dot mr-1 text-indigo-400"></i> {{ Str::limit($post->location_text, 30) }}
-                                    </p>
-                                    <div class="mt-auto pt-3 border-t border-gray-50 flex justify-between items-center text-xs text-gray-400">
+
+                                <div class="p-3 flex-1 flex flex-col">
+                                    <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-1 group-hover:text-indigo-600 transition">{{ $post->title }}</h3>
+                                    
+                                    <div class="flex items-start gap-1 text-xs text-gray-500 mb-2 h-8 overflow-hidden">
+                                        <i class="fa-solid fa-location-dot mt-0.5 text-gray-400"></i> 
+                                        <span class="line-clamp-2">{{ $post->location_text }}</span>
+                                    </div>
+
+                                    <div class="mt-auto pt-2 border-t border-gray-50 flex justify-between items-center text-[10px] text-gray-400">
                                         <span>{{ $post->created_at->diffForHumans() }}</span>
-                                        <span class="group-hover:translate-x-1 transition transform"><i class="fa-solid fa-arrow-right"></i></span>
                                     </div>
                                 </div>
                             </a>
                             @endforeach
                         </div>
                     @else
-                        <div class="bg-white rounded-xl p-12 text-center border border-gray-200">
-                            <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
-                            <p class="text-gray-500">ยังไม่มีรายการประกาศ</p>
+                        <div class="flex flex-col items-center justify-center h-64 text-center">
+                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-box-open text-2xl text-gray-300"></i>
+                            </div>
+                            <h3 class="text-base font-medium text-gray-900">ยังไม่มีรายการประกาศ</h3>
+                            <p class="text-sm text-gray-400">ผู้ใช้นี้ยังไม่ได้โพสต์ประกาศใดๆ</p>
                         </div>
                     @endif
                 </div>
-
             </div>
         </div>
     </div>

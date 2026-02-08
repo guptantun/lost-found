@@ -12,6 +12,7 @@
     
     <style> 
         body { font-family: 'Prompt', sans-serif; } 
+        /* แก้ไข Map ซ้อนทับ Navbar */
         .leaflet-container { z-index: 0; }
     </style>
 </head>
@@ -29,7 +30,7 @@
                 
                 <div class="flex gap-2 items-center">
                     @auth
-                        <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-indigo-600 transition p-2 mr-2">
+                        <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-indigo-600 transition p-2 mr-2" title="ข้อความ">
                             <i class="fa-solid fa-comment-dots text-xl"></i>
                         </a>
 
@@ -37,7 +38,7 @@
                             <a href="{{ route('items.edit', $item->id) }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition">
                                 <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไข
                             </a>
-                            <form action="{{ route('items.destroy', $item->id) }}" method="POST" id="deleteForm">
+                            <form action="{{ route('items.destroy', $item->id) }}" method="POST" id="deleteForm" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" onclick="confirmDelete()" class="text-gray-500 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition">
@@ -56,7 +57,6 @@
             
             <div class="relative h-96 bg-gray-200 group">
                 @if($item->image_path)
-                    {{-- ✅ กลับมาใช้ asset('storage/...') สำหรับรูปใน Local Storage --}}
                     <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-contain bg-black/5">
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 flex-col">
@@ -64,6 +64,7 @@
                         <p>ไม่มีรูปภาพ</p>
                     </div>
                 @endif
+                
                 <div class="absolute top-6 left-6">
                     @if($item->status == 'returned')
                          <span class="px-4 py-2 rounded-full text-sm font-bold bg-gray-800 text-white shadow-lg tracking-wide border-2 border-white">
@@ -127,6 +128,7 @@
                         </div>
 
                     </div>
+                    
                     <div class="md:col-span-1">
                         @if($item->status == 'returned')
                             <div class="bg-gray-100 border-2 border-gray-200 rounded-xl p-6 text-center">
@@ -166,19 +168,25 @@
                                 <a href="tel:{{ $item->phone_number }}" class="block w-full bg-white border-2 border-indigo-600 text-indigo-600 py-3 rounded-lg font-bold hover:bg-indigo-50 transition">
                                     <i class="fa-solid fa-phone mr-2"></i> โทรหา
                                 </a>
+
                                 @auth
                                     @if(Auth::id() !== $item->user_id)
-                                        <button onclick="openReportModal()" class="block w-full text-gray-400 hover:text-red-500 text-sm font-medium transition mt-4">
-                                            <i class="fa-solid fa-flag mr-1"></i> แจ้งประกาศไม่เหมาะสม
-                                        </button>
-                                        
-                                        <form id="reportForm" action="{{ route('reports.store', $item->id) }}" method="POST" class="hidden">
-                                            @csrf
-                                            <input type="hidden" name="reason" id="reportReason">
-                                        </form>
+                                        <div class="mt-4 pt-4 border-t border-gray-100">
+                                            <button onclick="openReportModal()" class="flex items-center justify-center gap-2 text-red-500 hover:text-red-700 transition font-medium w-full text-sm">
+                                                <i class="fa-solid fa-flag"></i> แจ้งประกาศไม่เหมาะสม
+                                            </button>
+                                            
+                                            <form id="reportForm" action="{{ route('reports.store', $item->id) }}" method="POST" class="hidden">
+                                                @csrf
+                                                <input type="hidden" name="reason" id="reportReason">
+                                            </form>
+                                        </div>
                                     @endif
                                 @endauth
-                                <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-shield-halved mr-1"></i> โปรดระมัดระวังการโอนเงินก่อนได้รับของ</p>
+                                
+                                <p class="text-xs text-gray-400 mt-4 bg-yellow-50 p-2 rounded border border-yellow-100">
+                                    <i class="fa-solid fa-shield-halved mr-1 text-yellow-500"></i> โปรดระมัดระวังการโอนเงินก่อนได้รับของ
+                                </p>
                             </div>
                         @endif
                     </div>
@@ -189,6 +197,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // แสดง Alert เมื่อมีการ Redirect กลับมาพร้อมข้อความ success
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
@@ -199,15 +208,16 @@
             })
         @endif
 
+        // ฟังก์ชันยืนยันการลบ
         function confirmDelete() {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
-                text: "คุณแน่ใจหรือไม่ที่จะลบประกาศนี้",
+                text: "คุณแน่ใจหรือไม่ที่จะลบประกาศนี้ การกระทำนี้ไม่สามารถย้อนกลับได้",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ลบเลย',
+                confirmButtonText: 'ลบประกาศ',
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -216,6 +226,7 @@
             })
         }
 
+        // ฟังก์ชันแสดงแผนที่ (ถ้ามีพิกัด)
         @if($item->latitude && $item->longitude)
             var lat = {{ $item->latitude }};
             var lng = {{ $item->longitude }};
@@ -231,6 +242,7 @@
                 .openPopup();
         @endif
         
+        // ฟังก์ชันแจ้งปัญหา (Report) ด้วย SweetAlert2
         function openReportModal() {
             Swal.fire({
                 title: 'แจ้งปัญหาประกาศ',
@@ -239,15 +251,22 @@
                     'spam': 'สแปม / โฆษณา',
                     'scam': 'หลอกลวง / มิจฉาชีพ',
                     'fake': 'ข้อมูลเท็จ / ไม่ใช่ของหายจริง',
-                    'inappropriate': 'เนื้อหาไม่เหมาะสม'
+                    'inappropriate': 'เนื้อหาไม่เหมาะสม / หยาบคาย',
+                    'other': 'อื่นๆ'
                 },
                 inputPlaceholder: 'กรุณาเลือกเหตุผล',
                 showCancelButton: true,
                 confirmButtonText: 'ส่งรายงาน',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#ef4444'
+                confirmButtonColor: '#ef4444',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'กรุณาเลือกเหตุผลก่อนส่งรายงาน'
+                    }
+                }
             }).then((result) => {
                 if (result.isConfirmed && result.value) {
+                    // ใส่ค่าที่เลือกลงใน Hidden Input และ Submit Form
                     document.getElementById('reportReason').value = result.value;
                     document.getElementById('reportForm').submit();
                 }

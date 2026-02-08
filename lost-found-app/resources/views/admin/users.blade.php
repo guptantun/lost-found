@@ -15,7 +15,7 @@
     <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex">
         <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-950">
             <i class="fa-solid fa-shield-cat text-2xl"></i>
-            <span class="text-lg font-bold text-yellow-500">ADMIN CENTER</span>
+            <span class="text-lg font-bold text-yellow-500 ml-2">ADMIN CENTER</span>
         </div>
         <nav class="flex-1 px-3 py-6 space-y-2">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition">
@@ -49,14 +49,6 @@
             </div>
         </div>
         @endif
-        @if(session('error'))
-        <div class="px-8 mt-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                <strong class="font-bold">ผิดพลาด!</strong>
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        </div>
-        @endif
 
         <div class="flex-1 overflow-y-auto p-8">
             <div class="bg-white p-4 rounded-xl shadow-sm mb-6 flex justify-between items-center">
@@ -75,9 +67,7 @@
                             <th class="px-6 py-4">ID</th>
                             <th class="px-6 py-4">ชื่อผู้ใช้</th>
                             <th class="px-6 py-4">อีเมล</th>
-                            <th class="px-6 py-4">วันที่สมัคร</th>
-                            <th class="px-6 py-4">สถานะ</th>
-                            <th class="px-6 py-4 text-right">จัดการ</th>
+                            <th class="px-6 py-4">สถานะ</th> <th class="px-6 py-4 text-right">เครื่องมือจัดการ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -90,30 +80,51 @@
                                 </div>
                                 <div>
                                     {{ $user->name }}
-                                    @if($user->is_admin == 1 || $user->role == 'admin')
-                                        <span class="ml-2 bg-yellow-100 text-yellow-700 text-[10px] px-2 py-0.5 rounded-full border border-yellow-200 font-bold">ADMIN</span>
-                                    @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4">{{ $user->email }}</td>
-                            <td class="px-6 py-4">{{ $user->created_at->format('d/m/Y') }}</td>
+                            
                             <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold">ปกติ</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                @if($user->id !== Auth::id() && $user->is_admin != 1) 
-                                    <form action="{{ route('admin.delete_user', $user->id) }}" method="POST" onsubmit="return confirmDelete(this);">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-white hover:bg-red-600 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition duration-200 flex items-center gap-2 ml-auto">
-                                            <i class="fa-solid fa-trash"></i> ลบผู้ใช้
-                                        </button>
-                                    </form>
-                                @elseif($user->id === Auth::id())
-                                    <span class="text-slate-400 text-xs italic">บัญชีของคุณ</span>
+                                @if($user->is_admin == 1)
+                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">
+                                        <i class="fa-solid fa-crown mr-1"></i> ADMIN
+                                    </span>
                                 @else
-                                    <span class="text-yellow-600 text-xs italic">Admin หลัก</span>
+                                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
+                                        USER
+                                    </span>
                                 @endif
+                            </td>
+
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end items-center gap-2">
+                                    
+                                    @if($user->id !== Auth::id()) 
+                                        <form action="{{ route('admin.toggle_admin', $user->id) }}" method="POST">
+                                            @csrf
+                                            @if($user->is_admin == 1)
+                                                <button type="submit" class="text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 text-xs font-bold transition flex items-center gap-1" title="ปลดจาก Admin">
+                                                    <i class="fa-solid fa-user-minus"></i> ปลด Admin
+                                                </button>
+                                            @else
+                                                <button type="submit" class="text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 text-xs font-bold transition flex items-center gap-1" title="ตั้งเป็น Admin">
+                                                    <i class="fa-solid fa-user-plus"></i> ตั้ง Admin
+                                                </button>
+                                            @endif
+                                        </form>
+
+                                        <form action="{{ route('admin.delete_user', $user->id) }}" method="POST" onsubmit="return confirmDelete(this);">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold transition flex items-center gap-1">
+                                                <i class="fa-solid fa-trash"></i> ลบ
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-slate-400 text-xs italic px-3">บัญชีของคุณ</span>
+                                    @endif
+
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -131,12 +142,12 @@
             event.preventDefault();
             Swal.fire({
                 title: 'ยืนยันการลบ?',
-                text: "หากลบแล้ว ข้อมูลของผู้ใช้นี้ (และประกาศทั้งหมด) จะหายไปถาวร!",
+                text: "ข้อมูลจะหายไปถาวร!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#d1d5db',
-                confirmButtonText: 'ใช่, ลบทิ้งเลย',
+                confirmButtonText: 'ลบ',
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {

@@ -10,16 +10,20 @@ class ReportController extends Controller
 {
     public function store(Request $request, $itemId)
     {
+        // ตรวจสอบว่ามีข้อมูลส่งมาไหม
         $request->validate([
-            'reason' => 'required|string|max:255',
+            'reason' => 'required|string|max:1000',
         ]);
 
+        // บันทึกลงฐานข้อมูล
         Report::create([
-            'item_id' => $itemId,
             'user_id' => Auth::id(),
-            'reason' => $request->reason,
+            'item_id' => $itemId,
+            'reason' => $request->reason, // ใส่เหตุผลลงในฟิลด์ reason ตาม Migration
+            'status' => 'pending', // สถานะเริ่มต้นคือ รอตรวจสอบ
         ]);
 
-        return back()->with('success', 'ขอบคุณที่แจ้งปัญหา เราจะตรวจสอบโดยเร็วที่สุด');
+        // แจ้งเตือนและกลับหน้าเดิม
+        return back()->with('success', 'ส่งรายงานเรียบร้อยแล้ว ทางเราจะรีบตรวจสอบครับ');
     }
 }
